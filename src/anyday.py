@@ -1,10 +1,17 @@
 import requests
 import bs4
+import os
+import subprocess
+import msvcrt
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
+from colorama import Fore, Style
 
 WEBSITE = "https://animeschedule.net/"
 
+def clear():
+    cmd = "cls" if os.name == "nt" else "clear"
+    subprocess.call(cmd, shell=True)
 
 def get_soup(html: str) -> BeautifulSoup:
     return BeautifulSoup(html, features="html.parser")
@@ -71,11 +78,12 @@ def run():
     print("Fetching anime schedule...")
     soup = get_soup(requests.get(WEBSITE).text)
     days = get_all_days(soup)
+    clear()
 
     day_names = [d.name for d in days]
     print("\nAvailable days:")
     for i, name in enumerate(day_names, 1):
-        print(f"  {i}. {name.capitalize()}")
+        print(f"\n  {i}. {name.capitalize()}")
 
     while True:
         choice = input("\nEnter the day name or number: ").strip().lower()
@@ -92,10 +100,13 @@ def run():
             break
         print(f"Invalid choice. Please enter a number (1-{len(days)}) or a valid day name.")
 
-    anime = selected.anime_list[:5]
-    print(f"\nAnime airing on {selected.name.capitalize()} (showing {len(anime)}):")
+    clear()
+    anime = selected.anime_list[:50]
+    print(f"\nAnime airing on {selected.name.capitalize()} (showing {len(anime)}):\n")
     for i, (title, hour) in enumerate(anime, 1):
-        print(f"  {i}. {title}  —  {hour}")
+        print(f"\033[92m {i}. {title}   —   {hour} \n\033[0m")
+    print("Press any key to continue...")
+    msvcrt.getch()
 
 if __name__ == "__main__":
     run()
